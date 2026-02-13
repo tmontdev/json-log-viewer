@@ -86,6 +86,39 @@
           ],
           "default": "auto",
           "description": "Theme for the log viewer (auto uses VSCode theme)"
+        },
+        "slogViewer.messageKeys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "message",
+            "msg"
+          ],
+          "description": "List of keys to check for the log message content (in order of priority)"
+        },
+        "slogViewer.timestampKeys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "timestamp",
+            "ts",
+            "@timestamp"
+          ],
+          "description": "List of keys to check for the log timestamp (in order of priority)"
+        },
+        "slogViewer.levelKeys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "level"
+          ],
+          "description": "List of keys to check for the log level (in order of priority)"
         }
       }
     }

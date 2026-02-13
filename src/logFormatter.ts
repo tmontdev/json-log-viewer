@@ -208,7 +208,7 @@ export function isJSONLog(line: string): boolean {
 /**
  * Parse a JSON log line and extract key fields
  */
-export function parseJSONLog(line: string): ParsedLog | null {
+export function parseJSONLog(line: string, config?: vscode.WorkspaceConfiguration): ParsedLog | null {
   try {
     // Strip ANSI codes before parsing
     const cleaned = stripAnsiCodes(line).trim();
@@ -227,10 +227,17 @@ export function parseJSONLog(line: string): ParsedLog | null {
       obj = parsed;
     }
 
+    const messageKeys = config?.get<string[]>('messageKeys') || [];
+    const timestampKeys = config?.get<string[]>('timestampKeys') || [];
+    const levelKeys = config?.get<string[]>('levelKeys') || [];
+
     // Extract common fields (check various common field names)
-    const timestamp = obj.time || obj.timestamp || obj.ts || obj['@timestamp'] || obj.datetime;
-    let level = obj.level || obj.severity || obj.lvl || obj.loglevel || obj['log.level'];
-    const message = obj.message || obj.msg || obj.text;
+    const timestamp = getFirstFrom(obj, timestampKeys);
+    const message = getFirstFrom(obj, messageKeys);
+    let level = getFirstFrom(obj, levelKeys);
+    
+    // let level = obj.level || obj.severity || obj.lvl || obj.loglevel || obj.severityText || obj['log.level'];
+    // const message = obj.message || obj.msg || obj.text || obj.body;
 
     // Normalize log level to standard values
     if (level) {
@@ -340,10 +347,20 @@ export function processLine(line: string, config: vscode.WorkspaceConfiguration)
     return null;
   }
 
-  const parsed = parseJSONLog(line);
+  const parsed = parseJSONLog(line, config);
   if (!parsed) {
     return null;
   }
 
   return formatLog(parsed, config);
+}
+
+
+function getFirstFrom(obj: Record<string, any>, keys: string[]): any {
+  for (const key of keys) {
+    if (obj[key]) {
+      return obj[key];
+    }
+  }
+  return undefined;
 }

@@ -367,6 +367,7 @@ function getCurrentSessionLogs() {
 // Add a log entry to a specific session
 function addLogToSession(sessionId, log) {
     // Ensure session exists
+    console.log("CARALHO DE ASA")
     if (!sessions.has(sessionId)) {
         sessions.set(sessionId, {
             info: { id: sessionId, name: 'Unknown', isActive: true },

@@ -60,7 +60,7 @@ export class SlogDebugAdapterTracker implements vscode.DebugAdapterTracker {
 
       // Check if line is JSON/logfmt
       if (isJSONLog(line)) {
-        const parsed = parseJSONLog(line);
+        const parsed = parseJSONLog(line, this.config);
         if (parsed) {
           // Send parsed log to webview with session ID
           this.webviewProvider.addLog(this.sessionId, parsed);
