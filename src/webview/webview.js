@@ -406,7 +406,7 @@ function addLogToSession(sessionId, log) {
         if (!logMatchesAdvancedFilters(log) ||
             (levelFilter.value !== 'all' && log.level?.toLowerCase() !== levelFilter.value) ||
             (searchInput.value && !((log.message || '').toLowerCase().includes(searchInput.value.toLowerCase()) ||
-                                    JSON.stringify(log.otherFields).toLowerCase().includes(searchInput.value.toLowerCase())))) {
+                JSON.stringify(log.otherFields).toLowerCase().includes(searchInput.value.toLowerCase())))) {
             logElement.classList.add('hidden');
         }
 
@@ -672,26 +672,26 @@ function parseFilePath(value) {
 }
 
 // Create value element with proper styling
-function createValueElement(value) {
-    const span = document.createElement('span');
+function createValueElement(value, indent = 0, parentKey = '') {
+    const container = document.createElement('span');
 
     if (value === null) {
-        span.className = 'json-null';
-        span.textContent = 'null';
+        container.className = 'json-null';
+        container.textContent = 'null';
     } else if (typeof value === 'boolean') {
-        span.className = 'json-boolean';
-        span.textContent = value.toString();
+        container.className = 'json-boolean';
+        container.textContent = value.toString();
     } else if (typeof value === 'number') {
-        span.className = 'json-number';
-        span.textContent = value.toString();
+        container.className = 'json-number';
+        container.textContent = value.toString();
     } else if (typeof value === 'string') {
         // Check if this is a file path
         const fileInfo = parseFilePath(value);
         if (fileInfo) {
-            span.className = 'json-string json-file-link';
-            span.textContent = `"${value}"`;
-            span.title = 'Click to open file (use right-click for filter menu)';
-            span.addEventListener('click', (e) => {
+            container.className = 'json-string json-file-link';
+            container.textContent = `"${value}"`;
+            container.title = 'Click to open file (use right-click for filter menu)';
+            container.addEventListener('click', (e) => {
                 e.stopPropagation();
                 vscode.postMessage({
                     type: 'openFile',
@@ -700,20 +700,207 @@ function createValueElement(value) {
                 });
             });
         } else {
-            span.className = 'json-string';
-            span.textContent = `"${value}"`;
+            container.className = 'json-string';
+            container.textContent = `"${value}"`;
         }
     } else if (Array.isArray(value)) {
-        span.className = 'json-string';
-        span.textContent = JSON.stringify(value);
+        // Create collapsible array
+        return createCollapsibleArray(value, indent, parentKey);
     } else if (typeof value === 'object') {
-        span.className = 'json-string';
-        span.textContent = JSON.stringify(value);
+        // Create collapsible object
+        return createCollapsibleObject(value, indent, parentKey);
     } else {
-        span.textContent = String(value);
+        container.textContent = String(value);
     }
 
-    return span;
+    return container;
+}
+
+// Create a collapsible object element
+function createCollapsibleObject(obj, indent = 0, label = '') {
+    const container = document.createElement('span');
+    container.className = 'json-object-collapsible';
+
+    if (Object.keys(obj).length === 0) {
+        const span = document.createElement('span');
+        span.className = 'json-punctuation';
+        span.textContent = '{}';
+        container.appendChild(span);
+        return container;
+    }
+
+    // Create header with toggle button
+    const header = document.createElement('span');
+    header.className = 'json-object-header';
+    header.style.cursor = 'pointer';
+    header.style.userSelect = 'none';
+
+    const toggleBtn = document.createElement('span');
+    toggleBtn.className = 'json-toggle-btn';
+    toggleBtn.textContent = '▼';
+    toggleBtn.style.marginRight = '4px';
+    toggleBtn.style.display = 'inline-block';
+    toggleBtn.style.minWidth = '12px';
+    toggleBtn.style.color = 'var(--foreground)';
+
+    const bracketSpan = document.createElement('span');
+    bracketSpan.className = 'json-punctuation';
+    bracketSpan.textContent = '{...}';
+
+    header.appendChild(toggleBtn);
+    header.appendChild(bracketSpan);
+    container.appendChild(header);
+
+    // Create content (initially hidden)
+    const content = document.createElement('span');
+    content.className = 'json-object-content';
+    content.style.display = 'none';
+
+    // Create full nested structure
+    const nestedDiv = document.createElement('div');
+    nestedDiv.style.paddingLeft = `${(indent + 1) * 16}px`;
+
+    const entries = Object.entries(obj);
+    entries.forEach(([key, val], index) => {
+        const line = document.createElement('div');
+        line.className = 'json-line filterable';
+        line.style.paddingLeft = `${(indent + 1) * 16}px`;
+
+        // Make the whole line clickable for filtering
+        const displayValue = val === null ? 'null' :
+            typeof val === 'object' ? JSON.stringify(val) : String(val);
+        line.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showContextMenu(e, key, displayValue);
+        });
+
+        // Key
+        const keySpan = document.createElement('span');
+        keySpan.className = 'json-key';
+        keySpan.textContent = `"${key}"`;
+        line.appendChild(keySpan);
+
+        // Colon
+        const colonSpan = document.createElement('span');
+        colonSpan.className = 'json-punctuation';
+        colonSpan.textContent = ': ';
+        line.appendChild(colonSpan);
+
+        // Recursively create value element to support nested structures
+        const valueSpan = createValueElement(val, indent, key);
+        // const valueSpan = createValueElement(val, indent + 1, key);
+        line.appendChild(valueSpan);
+
+        // Comma
+        if (index < entries.length - 1) {
+            const commaSpan = document.createElement('span');
+            commaSpan.className = 'json-punctuation';
+            commaSpan.textContent = ',';
+            line.appendChild(commaSpan);
+        }
+
+        nestedDiv.appendChild(line);
+    });
+
+    content.appendChild(nestedDiv);
+    container.appendChild(content);
+
+    // Toggle handler
+    header.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isHidden = content.style.display === 'none';
+        content.style.display = isHidden ? 'block' : 'none';
+        toggleBtn.textContent = isHidden ? '▼' : '▶';
+        toggleBtn.style.transform = isHidden ? 'none' : 'none';
+    });
+
+    return container;
+}
+
+// Create a collapsible array element
+function createCollapsibleArray(arr, indent = 0, label = '') {
+    const container = document.createElement('span');
+    container.className = 'json-array-collapsible';
+
+    if (arr.length === 0) {
+        const span = document.createElement('span');
+        span.className = 'json-punctuation';
+        span.textContent = '[]';
+        container.appendChild(span);
+        return container;
+    }
+
+    // Create header with toggle button
+    const header = document.createElement('span');
+    header.className = 'json-array-header';
+    header.style.cursor = 'pointer';
+    header.style.userSelect = 'none';
+
+    const toggleBtn = document.createElement('span');
+    toggleBtn.className = 'json-toggle-btn';
+    toggleBtn.textContent = '▼';
+    toggleBtn.style.marginRight = '4px';
+    toggleBtn.style.display = 'inline-block';
+    toggleBtn.style.minWidth = '12px';
+    toggleBtn.style.color = 'var(--foreground)';
+
+    const bracketSpan = document.createElement('span');
+    bracketSpan.className = 'json-punctuation';
+    bracketSpan.textContent = `[${arr.length}]`;
+
+    header.appendChild(toggleBtn);
+    header.appendChild(bracketSpan);
+    container.appendChild(header);
+
+    // Create content (initially hidden)
+    const content = document.createElement('span');
+    content.className = 'json-array-content';
+    content.style.display = 'none';
+
+    // Create full nested structure
+    const nestedDiv = document.createElement('div');
+    nestedDiv.style.paddingLeft = `${(indent + 1) * 16}px`;
+
+    arr.forEach((item, index) => {
+        const line = document.createElement('div');
+        line.className = 'json-line';
+        line.style.paddingLeft = `${(indent + 1) * 16}px`;
+
+        // Index
+        const indexSpan = document.createElement('span');
+        indexSpan.className = 'json-punctuation';
+        indexSpan.textContent = `[${index}]: `;
+        line.appendChild(indexSpan);
+
+        // Recursively create value element to support nested structures
+        const valueSpan = createValueElement(item, indent, `[${index}]`);
+        // const valueSpan = createValueElement(item, indent + 1, `[${index}]`);
+        line.appendChild(valueSpan);
+
+        // Comma
+        if (index < arr.length - 1) {
+            const commaSpan = document.createElement('span');
+            commaSpan.className = 'json-punctuation';
+            commaSpan.textContent = ',';
+            line.appendChild(commaSpan);
+        }
+
+        nestedDiv.appendChild(line);
+    });
+
+    content.appendChild(nestedDiv);
+    container.appendChild(content);
+
+    // Toggle handler
+    header.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isHidden = content.style.display === 'none';
+        content.style.display = isHidden ? 'block' : 'none';
+        toggleBtn.textContent = isHidden ? '▼' : '▶';
+        toggleBtn.style.transform = isHidden ? 'none' : 'none';
+    });
+
+    return container;
 }
 
 // Format timestamp

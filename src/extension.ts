@@ -31,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   // Track debug session lifecycle
-  context.subscriptions.push(
+context.subscriptions.push(
     vscode.debug.onDidStartDebugSession((session) => {
       webviewProvider.addSession(session);
       webviewProvider.show();

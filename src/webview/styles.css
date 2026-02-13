@@ -594,6 +594,38 @@ body {
     text-decoration-style: solid;
 }
 
+/* Collapsible JSON Objects and Arrays */
+.json-object-collapsible,
+.json-array-collapsible {
+    display: inline;
+}
+
+.json-object-header,
+.json-array-header {
+    display: inline;
+    padding: 0 2px;
+    border-radius: 2px;
+}
+
+.json-object-header:hover,
+.json-array-header:hover {
+    background-color: var(--hover-background);
+}
+
+.json-toggle-btn {
+    display: inline-block;
+    width: 16px;
+    text-align: center;
+    font-size: 10px;
+    line-height: 1;
+}
+
+.json-object-content,
+.json-array-content {
+    display: block;
+    margin-left: 0;
+}
+
 /* Original JSON (collapsed by default) */
 .log-original {
     margin-top: 4px;
