@@ -627,7 +627,7 @@ function createJSONElement(obj, indent = 0) {
         line.appendChild(colonSpan);
 
         // Value (no longer needs individual click handler)
-        const valueSpan = createValueElement(value);
+        const valueSpan = createValueElement(value, indent, key);
         line.appendChild(valueSpan);
 
         // Comma
@@ -766,12 +766,15 @@ function createCollapsibleObject(obj, indent = 0, label = '') {
         line.className = 'json-line filterable';
         line.style.paddingLeft = `${(indent + 1) * 16}px`;
 
+        // Build full path for nested fields
+        const fullPath = label ? `${label}.${key}` : key;
+
         // Make the whole line clickable for filtering
         const displayValue = val === null ? 'null' :
             typeof val === 'object' ? JSON.stringify(val) : String(val);
         line.addEventListener('click', (e) => {
             e.stopPropagation();
-            showContextMenu(e, key, displayValue);
+            showContextMenu(e, fullPath, displayValue);
         });
 
         // Key
@@ -866,6 +869,9 @@ function createCollapsibleArray(arr, indent = 0, label = '') {
         line.className = 'json-line';
         line.style.paddingLeft = `${(indent + 1) * 16}px`;
 
+        // Build full path for array items
+        const fullPath = `${label}[${index}]`;
+
         // Index
         const indexSpan = document.createElement('span');
         indexSpan.className = 'json-punctuation';
@@ -873,8 +879,7 @@ function createCollapsibleArray(arr, indent = 0, label = '') {
         line.appendChild(indexSpan);
 
         // Recursively create value element to support nested structures
-        const valueSpan = createValueElement(item, indent, `[${index}]`);
-        // const valueSpan = createValueElement(item, indent + 1, `[${index}]`);
+        const valueSpan = createValueElement(item, indent + 1, fullPath);
         line.appendChild(valueSpan);
 
         // Comma

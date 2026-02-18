@@ -16,8 +16,8 @@ interface SessionData extends SessionInfo {
   logs: ParsedLog[];
 }
 
-export class SlogViewerWebviewProvider implements vscode.WebviewViewProvider {
-  public static readonly viewType = 'slog-viewer.logView';
+export class LogViewerWebviewProvider implements vscode.WebviewViewProvider {
+  public static readonly viewType = 'json-log-viewer.logView';
   private view?: vscode.WebviewView;
   private pendingLogs: Array<{ sessionId: string; log: ParsedLog }> = [];
   private isWebviewReady = false;
@@ -221,7 +221,7 @@ export class SlogViewerWebviewProvider implements vscode.WebviewViewProvider {
       return;
     }
 
-    const config = vscode.workspace.getConfiguration('slogViewer');
+    const config = vscode.workspace.getConfiguration('jsonLogViewer');
 
     const webviewConfig: WebviewConfig = {
       collapseJSON: config.get<boolean>('collapseJSON', true),
@@ -243,7 +243,7 @@ export class SlogViewerWebviewProvider implements vscode.WebviewViewProvider {
    */
   public show(): void {
     // Use VSCode command to focus the view - this works even if view isn't resolved yet
-    vscode.commands.executeCommand(`${SlogViewerWebviewProvider.viewType}.focus`);
+    vscode.commands.executeCommand(`${LogViewerWebviewProvider.viewType}.focus`);
   }
 
   /**

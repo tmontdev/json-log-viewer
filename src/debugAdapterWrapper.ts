@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { parseJSONLog, isJSONLog } from './logFormatter';
-import { SlogViewerWebviewProvider } from './webviewPanel';
+import { LogViewerWebviewProvider } from './webviewPanel';
 
 // Maximum number of recent lines to track for deduplication
 const MAX_PROCESSED_LINES = 1000;
@@ -8,16 +8,16 @@ const MAX_PROCESSED_LINES = 1000;
 /**
  * Debug Adapter Tracker that intercepts log output and sends to webview
  */
-export class SlogDebugAdapterTracker implements vscode.DebugAdapterTracker {
+export class LogDebugAdapterTracker implements vscode.DebugAdapterTracker {
   private config: vscode.WorkspaceConfiguration;
-  private webviewProvider: SlogViewerWebviewProvider;
+  private webviewProvider: LogViewerWebviewProvider;
   private processedLines: Set<string> = new Set();
   private processedLinesQueue: string[] = []; // Track insertion order for eviction
   private hasShownWebview = false;
   private sessionId: string;
 
-  constructor(session: vscode.DebugSession, webviewProvider: SlogViewerWebviewProvider) {
-    this.config = vscode.workspace.getConfiguration('slogViewer');
+  constructor(session: vscode.DebugSession, webviewProvider: LogViewerWebviewProvider) {
+    this.config = vscode.workspace.getConfiguration('jsonLogViewer');
     this.webviewProvider = webviewProvider;
     this.sessionId = session.id;
   }
@@ -35,7 +35,7 @@ export class SlogDebugAdapterTracker implements vscode.DebugAdapterTracker {
     }
 
     // Refresh config to get latest settings
-    this.config = vscode.workspace.getConfiguration('slogViewer');
+    this.config = vscode.workspace.getConfiguration('jsonLogViewer');
 
     // Process lines
     const lines = output.split('\n').filter((line: string) => line.trim());
@@ -78,7 +78,7 @@ export class SlogDebugAdapterTracker implements vscode.DebugAdapterTracker {
   }
 
   onWillStartSession(): void {
-    this.config = vscode.workspace.getConfiguration('slogViewer');
+    this.config = vscode.workspace.getConfiguration('jsonLogViewer');
     this.processedLines.clear();
     this.processedLinesQueue = [];
     this.hasShownWebview = false;
@@ -93,14 +93,14 @@ export class SlogDebugAdapterTracker implements vscode.DebugAdapterTracker {
 /**
  * Tracker factory that provides webview provider
  */
-export class SlogDebugAdapterTrackerFactory implements vscode.DebugAdapterTrackerFactory {
-  private webviewProvider: SlogViewerWebviewProvider;
+export class LogDebugAdapterTrackerFactory implements vscode.DebugAdapterTrackerFactory {
+  private webviewProvider: LogViewerWebviewProvider;
 
-  constructor(webviewProvider: SlogViewerWebviewProvider) {
+  constructor(webviewProvider: LogViewerWebviewProvider) {
     this.webviewProvider = webviewProvider;
   }
 
   createDebugAdapterTracker(session: vscode.DebugSession): vscode.ProviderResult<vscode.DebugAdapterTracker> {
-    return new SlogDebugAdapterTracker(session, this.webviewProvider);
+    return new LogDebugAdapterTracker(session, this.webviewProvider);
   }
 }
