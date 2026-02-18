@@ -1,13 +1,13 @@
 {
-  "name": "slog-viewer",
-  "displayName": "Slog Viewer - JSON Log Formatter",
-  "description": "Beautiful structured log viewer for debugging. Automatically formats JSON/logfmt logs with syntax highlighting, filtering, and search. Works with any language (Go slog, Node.js pino, Python structlog, etc.)",
-  "version": "1.1.4",
-  "publisher": "hojabri",
+  "name": "json-log-viewer",
+  "displayName": "JSON Log Viewer",
+  "description": "Beautiful structured log viewer for debugging. Automatically formats JSON logs with syntax highlighting, filtering, and search.",
+  "version": "0.0.1",
+  "publisher": "tmontdev",
   "icon": "icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hojabri/slog-viewer"
+    "url": "https://github.com/tmontdev/json-log-viewer"
   },
   "engines": {
     "vscode": "^1.80.0"
@@ -31,53 +31,53 @@
   "contributes": {
     "commands": [
       {
-        "command": "slog-viewer.clearLogs",
-        "title": "Slog Viewer: Clear Logs"
+        "command": "json-log-viewer.clearLogs",
+        "title": "JSON Log Viewer: Clear Logs"
       }
     ],
     "viewsContainers": {
       "panel": [
         {
-          "id": "slog-viewer-panel",
-          "title": "Slog Viewer",
+          "id": "json-log-viewer-panel",
+          "title": "JSON Log Viewer",
           "icon": "icon.png"
         }
       ]
     },
     "views": {
-      "slog-viewer-panel": [
+      "json-log-viewer-panel": [
         {
-          "id": "slog-viewer.logView",
-          "name": "Slog Viewer",
+          "id": "json-log-viewer.logView",
+          "name": "JSON LOg Viewer",
           "type": "webview"
         }
       ]
     },
     "viewsWelcome": [
       {
-        "view": "slog-viewer.logView",
+        "view": "json-log-viewer.logView",
         "contents": "No logs yet.\n\nStart debugging to see formatted structured logs.\n\n[Start Debugging](command:workbench.action.debug.start)"
       }
     ],
     "configuration": {
-      "title": "Slog Viewer",
+      "title": "JSON Log Viewer",
       "properties": {
-        "slogViewer.collapseJSON": {
+        "jsonLogViewer.collapseJSON": {
           "type": "boolean",
           "default": true,
           "description": "Show JSON collapsed by default (click to expand)"
         },
-        "slogViewer.showRawJSON": {
+        "jsonLogViewer.showRawJSON": {
           "type": "boolean",
           "default": false,
           "description": "Show the raw JSON log below each formatted entry"
         },
-        "slogViewer.autoScroll": {
+        "jsonLogViewer.autoScroll": {
           "type": "boolean",
           "default": true,
           "description": "Automatically scroll to the latest log entry"
         },
-        "slogViewer.theme": {
+        "jsonLogViewer.theme": {
           "type": "string",
           "enum": [
             "light",
@@ -87,7 +87,7 @@
           "default": "auto",
           "description": "Theme for the log viewer (auto uses VSCode theme)"
         },
-        "slogViewer.messageKeys": {
+        "jsonLogViewer.messageKeys": {
           "type": "array",
           "items": {
             "type": "string"
@@ -98,7 +98,7 @@
           ],
           "description": "List of keys to check for the log message content (in order of priority)"
         },
-        "slogViewer.timestampKeys": {
+        "jsonLogViewer.timestampKeys": {
           "type": "array",
           "items": {
             "type": "string"
@@ -110,7 +110,7 @@
           ],
           "description": "List of keys to check for the log timestamp (in order of priority)"
         },
-        "slogViewer.levelKeys": {
+        "jsonLogViewer.levelKeys": {
           "type": "array",
           "items": {
             "type": "string"
