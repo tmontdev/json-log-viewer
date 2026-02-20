@@ -60,6 +60,9 @@ export class LogViewerWebviewProvider implements vscode.WebviewViewProvider {
         case 'selectSession':
           this.setCurrentSession(message.sessionId);
           break;
+        case 'closeSession':
+          this.setCurrentSession(message.sessionId);
+          break;
       }
     });
 
@@ -113,8 +116,11 @@ export class LogViewerWebviewProvider implements vscode.WebviewViewProvider {
       log: log,
       sessionId: sessionId
     };
-
+    
     this.view.webview.postMessage(message);
+    if (this.currentSessionId != sessionId) {
+      this.setCurrentSession(sessionId);
+    }
   }
 
   /**
@@ -169,6 +175,7 @@ export class LogViewerWebviewProvider implements vscode.WebviewViewProvider {
     const session = this.sessions.get(sessionId);
     if (session) {
       session.isActive = false;
+      console.log(`Session ended: ${session.name}  (${session.id})`);
       this.sendSessionsToWebview();
     }
   }
@@ -182,6 +189,23 @@ export class LogViewerWebviewProvider implements vscode.WebviewViewProvider {
       this.sendSessionsToWebview();
     }
   }
+
+  /**
+   * Close a session
+   */
+  public closeSession(sessionId: string): void {
+    const session = this.sessions.get(sessionId);
+    if (session) {
+      if (this.currentSessionId === sessionId) {
+        this.currentSessionId = null;
+      }
+      this.sessions.delete(sessionId);
+      console.log(`Session closed: ${session.name}  (${session.id})`);
+      this.sendSessionsToWebview();
+    }
+      
+  }
+  
 
   /**
    * Get the current session ID

@@ -2,9 +2,9 @@
 :root {
     --error-color: #ff5555;
     --warn-color: #ffb86c;
-    --info-color: #8be9fd;
-    --debug-color: #999999;
-    --trace-color: #6272a4;
+    --info-color: #878787;
+    --debug-color: #6fcaa7;
+    --trace-color: #8cd0b6;
 
     --background: var(--vscode-editor-background);
     --foreground: var(--vscode-editor-foreground);

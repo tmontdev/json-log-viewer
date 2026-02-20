@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { LogDebugAdapterTrackerFactory } from './debugAdapterWrapper';
 import { LogViewerWebviewProvider } from './webviewPanel';
+import * as path from 'path';
 
 let webviewProvider: LogViewerWebviewProvider;
 
@@ -9,8 +10,8 @@ let webviewProvider: LogViewerWebviewProvider;
  */
 export function activate(context: vscode.ExtensionContext) {
   console.log('JSON Log Viewer extension is now active');
-
-  // Create webview provider
+  const interceptorPath = path.join(context.extensionPath, 'dist', 'stdout-interceptor.js');
+  context.environmentVariableCollection.append('NODE_OPTIONS', ` --require "${interceptorPath}"`);
   webviewProvider = new LogViewerWebviewProvider(context.extensionUri);
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
@@ -31,10 +32,10 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   // Track debug session lifecycle
-context.subscriptions.push(
+  context.subscriptions.push(
     vscode.debug.onDidStartDebugSession((session) => {
       webviewProvider.addSession(session);
-      webviewProvider.show();
+      // webviewProvider.show();
     })
   );
 

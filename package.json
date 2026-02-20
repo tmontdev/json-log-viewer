@@ -2,7 +2,7 @@
   "name": "json-log-viewer",
   "displayName": "JSON Log Viewer",
   "description": "Beautiful structured log viewer for debugging. Automatically formats JSON logs with syntax highlighting, filtering, and search.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "tmontdev",
   "icon": "icon.png",
   "repository": {
@@ -133,7 +133,7 @@
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
-    "@types/node": "^20.19.24",
+    "@types/node": "^20.19.33",
     "@types/vscode": "^1.80.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
