@@ -12,6 +12,33 @@ export function activate(context: vscode.ExtensionContext) {
   console.log('JSON Log Viewer extension is now active');
   const interceptorPath = path.join(context.extensionPath, 'dist', 'stdout-interceptor.js');
   context.environmentVariableCollection.append('NODE_OPTIONS', ` --require "${interceptorPath}"`);
+  const configProvider = vscode.debug.registerDebugConfigurationProvider('*', {
+  resolveDebugConfiguration(folder, config, token) {
+    
+    // Regra: Se for um attach puro de "pwa-node" (ex: anexando a um container docker rodando), 
+    // nós não podemos injetar variáveis, então retornamos.
+    if (config.type === 'pwa-node' && config.request === 'attach') {
+      return config;
+    }
+
+    // Se passou, significa que é um "launch" OU um "node-terminal" (que usa attach).
+    // Em ambos os casos, o VS Code vai instanciar o ambiente, então PODEMOS injetar!
+
+    const interceptorPath = path.join(context.extensionPath, 'dist', 'stdout-interceptor.js');
+    
+    config.env = config.env || {};
+    const launchEnvOptions = config.env.NODE_OPTIONS || '';
+    const systemEnvOptions = process.env.NODE_OPTIONS || '';
+    const userExistingNodeOptions = launchEnvOptions || systemEnvOptions;
+
+    if (!userExistingNodeOptions.includes('stdout-interceptor.js')) {
+      // Adicionamos o nosso interceptador silenciosamente
+      config.env.NODE_OPTIONS = `${userExistingNodeOptions} --require "${interceptorPath}"`.trim();
+    }
+
+    return config;
+  }
+});
   webviewProvider = new LogViewerWebviewProvider(context.extensionUri);
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(

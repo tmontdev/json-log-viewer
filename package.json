@@ -2,7 +2,7 @@
   "name": "json-log-viewer",
   "displayName": "JSON Log Viewer",
   "description": "Beautiful structured log viewer for debugging. Automatically formats JSON logs with syntax highlighting, filtering, and search.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "tmontdev",
   "icon": "icon.png",
   "repository": {
